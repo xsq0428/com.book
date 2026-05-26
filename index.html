@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#1a1a2e">
+    <title>快乐农场</title>
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌾</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- 顶部信息栏 -->
+        <header class="game-header">
+            <div class="player-avatar" id="player-avatar" onclick="showAvatarPanel()">👤</div>
+            <div class="player-stats">
+                <div class="player-name-row">
+                    <span class="player-name" id="player-name">农场主</span>
+                    <span class="player-level" id="player-level">Lv.1</span>
+                </div>
+                <div class="exp-row">
+                    <div class="exp-bar-bg">
+                        <div id="exp-bar-fill" class="exp-bar-fill"></div>
+                    </div>
+                    <span id="exp-text" class="exp-text">0/100</span>
+                </div>
+            </div>
+            <div class="coin-display" onclick="togglePanel('coin-panel')">
+                <span class="coin-icon">💰</span>
+                <span id="coin-count">200</span>
+            </div>
+        </header>
+
+        <!-- 用户信息栏 -->
+        <div class="user-bar" id="user-bar">
+            <span style="color: #666; font-size: 0.7em;">农场 ID: <span id="user-id">--</span></span>
+            <div style="display:flex;gap:8px;">
+                <button onclick="showPetPanel()" style="background:#2d2d44;color:#FF69B4;border:1px solid #FF69B4;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.7em;">🐾 宠物</button>
+                <button onclick="showLandPanel()" style="background:#2d2d44;color:#CD853F;border:1px solid #CD853F;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.7em;">🟫 土地</button>
+                <button onclick="showAdminLogin()" style="background:#2d2d44;color:#FFD700;border:1px solid #FFD700;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.7em;">🔐 管理</button>
+                <button onclick="showDecorationPanel()" style="background:#2d2d44;color:#32CD32;border:1px solid #32CD32;padding:3px 8px;border-radius:4px;cursor:pointer;font-size:0.7em;">🎨 装饰</button>
+            </div>
+            <div class="user-id-display" onclick="copyUserId()">
+                <span class="copy-icon">📋</span>
+            </div>
+        </div>
+
+        <!-- 农场区域 -->
+        <main class="farm-area" id="farm-area">
+            <div class="farm-grid" id="farm-grid"></div>
+        </main>
+
+        <!-- 功能面板 -->
+        <section class="control-panel" id="control-panel">
+            <div class="panel-section">
+                <h3>🌱 种子</h3>
+                <div class="inventory" id="seed-inventory"></div>
+            </div>
+
+            <div class="panel-section">
+                <h3>🎉 果实</h3>
+                <div class="inventory" id="crop-inventory"></div>
+            </div>
+
+            <div class="panel-section">
+                <h3>🏪 商店</h3>
+                <div class="seed-shop" id="shop-area"></div>
+            </div>
+        </section>
+
+        <!-- 操作提示 -->
+        <div class="action-tip" id="action-tip">💡 点击土地进行操作</div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" onclick="scrollToSection('farm-area')">
+                <span class="nav-icon">🏡</span><span>农场</span>
+            </button>
+            <button class="nav-item" onclick="scrollToSection('seed-inventory')">
+                <span class="nav-icon">🌱</span><span>种子</span>
+            </button>
+            <button class="nav-item" onclick="scrollToSection('crop-inventory')">
+                <span class="nav-icon">🎉</span><span>果实</span>
+            </button>
+            <button class="nav-item" onclick="scrollToSection('shop-area')">
+                <span class="nav-icon">🛒</span><span>商城</span>
+            </button>
+            <button class="nav-item" onclick="showSettingsPanel()">
+                <span class="nav-icon">⚙️</span><span>设置</span>
+            </button>
+        </nav>
+
+        <!-- 设置面板 -->
+        <div class="modal" id="settings-modal">
+            <div class="modal-content">
+                <h2>⚙️ 游戏设置</h2>
+                
+                <div class="setting-section">
+                    <h3>🔊 音效设置</h3>
+                    <div class="setting-item">
+                        <label>背景音乐</label>
+                        <label class="switch">
+                            <input type="checkbox" id="bgm-toggle" checked onchange="toggleBGM()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>音效</label>
+                        <label class="switch">
+                            <input type="checkbox" id="sfx-toggle" checked onchange="toggleSFX()">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>音量大小</label>
+                        <div class="slider-group">
+                            <input type="range" id="volume-slider" min="0" max="100" value="50" onchange="setVolume(this.value)">
+                            <span class="slider-value" id="volume-value">50%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-section">
+                    <h3>👤 用户信息</h3>
+                    <div class="user-info-card">
+                        <div class="user-avatar-large" id="settings-avatar">👤</div>
+                        <div class="user-details">
+                            <div class="user-name-large" id="settings-username">农场主</div>
+                            <div class="user-id-large">ID: <span id="settings-userid">--</span></div>
+                            <div class="user-stats">
+                                <span>Lv.<span id="settings-level">1</span></span>
+                                <span>💰<span id="settings-coins">0</span></span>
+                            </div>
+                        </div>
+                        <button class="btn-copy-id" onclick="copyUserId()">📋 复制 ID</button>
+                    </div>
+                </div>
+
+                <div class="setting-section">
+                    <h3>🎮 游戏控制</h3>
+                    <div class="button-row">
+                        <button class="btn btn-secondary" onclick="saveGame()">💾 保存游戏</button>
+                        <button class="btn btn-secondary" onclick="showHelpModal()">❓ 游戏帮助</button>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeModal('settings-modal')">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 弹出窗口 -->
+        <div class="modal" id="modal">
+            <div class="modal-content">
+                <h2 id="modal-title">标题</h2>
+                <div id="modal-body"></div>
+                <div class="modal-actions" id="modal-footer"></div>
+            </div>
+        </div>
+
+        <!-- 果实出售面板 -->
+        <div class="modal" id="sell-modal">
+            <div class="modal-content">
+                <h2>🎉 出售果实</h2>
+                <div id="sell-modal-body" style="text-align:center;margin-bottom:15px;"></div>
+                <div class="sell-quantity-selector" style="display:flex;justify-content:center;gap:15px;margin:15px 0;">
+                    <button class="qty-btn" onclick="adjustSellQty(-1)" style="width:35px;height:35px;border-radius:50%;border:2px solid #FFD700;background:#1a1a2e;color:#FFD700;font-size:1.2em;">-</button>
+                    <span id="sell-qty" style="font-size:1.4em;font-weight:bold;color:#FFD700;min-width:30px;text-align:center;display:inline-block;">0</span>
+                    <button class="qty-btn" onclick="adjustSellQty(1)" style="width:35px;height:35px;border-radius:50%;border:2px solid #FFD700;background:#1a1a2e;color:#FFD700;font-size:1.2em;">+</button>
+                </div>
+                <div class="sell-total" style="text-align:center;font-size:0.9em;padding:10px;background:#1a1a2e;border-radius:8px;margin-bottom:12px;border:1px solid #FFD700;">
+                    可获得：<span class="total-coins" style="font-size:1.2em;font-weight:bold;color:#FFD700;">0</span> 金币
+                </div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeSellModal()">取消</button>
+                    <button class="modal-action-btn confirm" onclick="confirmSell()">出售</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 土地管理面板 -->
+        <div class="modal" id="land-modal">
+            <div class="modal-content">
+                <h2>🟫 土地管理</h2>
+                <div class="land-stats" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:15px;"></div>
+                <div id="land-list" style="max-height:300px;overflow-y:auto;"></div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeModal('land-modal')">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 装饰面板 -->
+        <div class="modal" id="decoration-modal">
+            <div class="modal-content">
+                <h2>🎨 农场装饰</h2>
+                <div id="decoration-panel" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:10px;margin-bottom:15px;"></div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeModal('decoration-modal')">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 后台登录弹窗 -->
+        <div class="modal" id="admin-login-modal">
+            <div class="modal-content">
+                <h2>⚙️ 后台管理登录</h2>
+                <div class="login-form" style="display:flex;flex-direction:column;gap:10px;">
+                    <input type="text" id="admin-username" placeholder="用户名" style="padding:10px;background:#1a1a2e;border:1px solid #444;border-radius:6px;color:#FFF;font-size:1em;">
+                    <input type="password" id="admin-password" placeholder="密码" style="padding:10px;background:#1a1a2e;border:1px solid #444;border-radius:6px;color:#FFF;font-size:1em;">
+                    <button class="modal-action-btn confirm" onclick="adminLogin()" style="width:100%;padding:12px;">登录</button>
+                </div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeModal('admin-login-modal')">取消</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal" id="buy-modal">
+            <div class="modal-content">
+                <h2 id="buy-modal-title">确认购买</h2>
+                <div id="buy-modal-body"></div>
+                <div class="buy-quantity-selector" id="buy-qty-selector" style="display:flex;justify-content:center;gap:15px;margin:15px 0;">
+                    <button class="qty-btn" onclick="adjustQty(-1)" style="width:35px;height:35px;border-radius:50%;border:2px solid #FFD700;background:#1a1a2e;color:#FFD700;font-size:1.2em;">-</button>
+                    <span id="buy-qty" style="font-size:1.4em;font-weight:bold;color:#FFD700;min-width:30px;text-align:center;display:inline-block;">1</span>
+                    <button class="qty-btn" onclick="adjustQty(1)" style="width:35px;height:35px;border-radius:50%;border:2px solid #FFD700;background:#1a1a2e;color:#FFD700;font-size:1.2em;">+</button>
+                </div>
+                <div class="buy-total" id="buy-total" style="text-align:center;font-size:0.9em;padding:10px;background:#1a1a2e;border-radius:8px;margin-bottom:12px;border:1px solid #FFD700;">
+                    总计：<span class="total-coins" style="font-size:1.2em;font-weight:bold;color:#FFD700;">0</span> 金币
+                </div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeBuyModal()">取消</button>
+                    <button class="modal-action-btn confirm" onclick="confirmBuy()">购买</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 宠物面板 -->
+        <div class="modal" id="pet-modal">
+            <div class="modal-content">
+                <h2>🐾 我的宠物</h2>
+                <div class="pet-area-display" style="text-align:center;padding:20px;background:#1a1a2e;border-radius:8px;margin-bottom:15px;">
+                    <div id="modal-pet-emoji" style="font-size:4em;margin-bottom:10px;">🐶</div>
+                    <div id="modal-pet-name" style="color:#FFD700;font-size:1.2em;font-weight:bold;">小狗</div>
+                    <div id="modal-pet-heart" style="color:#FF69B4;margin-top:5px;">❤️❤️❤️</div>
+                </div>
+                <div id="pet-selector"></div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeModal('pet-modal')">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 好友面板 -->
+        <div class="modal" id="friends-modal">
+            <div class="modal-content">
+                <h2>👥 好友列表</h2>
+                <div class="friends-search" style="display:flex;gap:8px;margin-bottom:15px;">
+                    <input type="text" id="friend-search-input" placeholder="输入好友 ID" style="flex:1;padding:8px;background:#1a1a2e;border:1px solid #444;border-radius:6px;color:#FFF;">
+                    <button class="modal-action-btn confirm" onclick="searchFriend()" style="padding:8px 15px;">搜索</button>
+                </div>
+                <div id="friends-list" style="max-height:300px;overflow-y:auto;"></div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeModal('friends-modal')">关闭</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 头像选择面板 -->
+        <div class="modal" id="avatar-modal">
+            <div class="modal-content">
+                <h2>🎨 自定义头像</h2>
+                <div class="avatar-current" style="text-align:center;margin-bottom:15px;">
+                    <div id="current-avatar-preview" style="width:80px;height:80px;font-size:3em;display:flex;align-items:center;justify-content:center;background:#1a1a2e;border-radius:50%;border:3px solid #FFD700;margin:0 auto;">👤</div>
+                    <div style="color:#888;font-size:0.8em;margin-top:8px;">点击选择头像或使用表情上传</div>
+                    <label for="avatar-upload" style="display:inline-block;margin-top:8px;padding:6px 15px;background:linear-gradient(135deg,#4CAF50 0%,#45a049 100%);color:#FFF;border-radius:6px;cursor:pointer;font-size:0.8em;">📤 上传表情</label>
+                    <input type="file" id="avatar-upload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(event)">
+                </div>
+                <div id="avatar-selector" class="avatar-grid"></div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeModal('avatar-modal')">关闭</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- 宠物面板 -->
+        <div class="modal" id="pet-modal">
+            <div class="modal-content">
+                <h2>🐾 我的宠物</h2>
+                <div class="pet-area-display">
+                    <div id="modal-pet-emoji" style="font-size:4em;margin-bottom:10px;">🐶</div>
+                    <div id="modal-pet-name" style="color:#FFD700;font-size:1.2em;font-weight:bold;">小狗</div>
+                    <div id="modal-pet-heart" style="color:#FF69B4;margin-top:5px;">❤️❤️❤️</div>
+                </div>
+                <div id="pet-selector" style="margin-top:15px;"></div>
+                <div class="modal-actions">
+                    <button class="modal-action-btn cancel" onclick="closeModal('pet-modal')">关闭</button>
+                </div>
+            </div>
+        </div>
+
+    <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>农场后台管理系统</title>
+    <link rel="stylesheet" href="style-admin.css">
+</head>
+<body>
+    <!-- 登录遮罩 -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-box">
+            <h1>🌾 农场管理系统</h1>
+            <p class="login-subtitle">请输入管理员账号</p>
+            <div class="login-form">
+                <input type="text" id="admin-username" placeholder="用户名" autocomplete="username">
+                <input type="password" id="admin-password" placeholder="密码" autocomplete="current-password">
+                <button onclick="adminLogin()" class="login-btn">登录</button>
+                <p id="login-error" class="login-error" style="display:none;"></p>
+            </div>
+        </div>
+    </div>
+    <div class="admin-layout hidden" id="admin-content">
+        <!-- 移动端菜单按钮 -->
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
+        
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>🌾 农场管理</h1>
+                <p>v3.0</p>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-page="dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span>数据概览</span>
+                </a>
+                <a href="#" class="nav-item" data-page="users">
+                    <span class="nav-icon">👥</span>
+                    <span>用户管理</span>
+                </a>
+                <a href="#" class="nav-item" data-page="game-settings">
+                    <span class="nav-icon">⚙️</span>
+                    <span>游戏设置</span>
+                </a>
+                <a href="#" class="nav-item" data-page="items">
+                    <span class="nav-icon">🎒</span>
+                    <span>道具管理</span>
+                </a>
+                <a href="#" class="nav-item" data-page="gift-codes">
+                    <span class="nav-icon">🎁</span>
+                    <span>礼包码</span>
+                </a>
+                <a href="#" class="nav-item" data-page="mail">
+                    <span class="nav-icon">📬</span>
+                    <span>邮件系统</span>
+                </a>
+                <a href="#" class="nav-item" data-page="achievements">
+                    <span class="nav-icon">🏆</span>
+                    <span>成就管理</span>
+                </a>
+                <a href="#" class="nav-item" data-page="logs">
+                    <span class="nav-icon">📝</span>
+                    <span>操作日志</span>
+                </a>
+                <a href="#" class="nav-item" data-page="data">
+                    <span class="nav-icon">💾</span>
+                    <span>数据管理</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="../" class="back-btn" target="_blank">← 返回游戏</a>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部栏 -->
+            <header class="top-bar">
+                <div class="breadcrumb" id="breadcrumb">数据概览</div>
+                <div class="admin-info">
+                    <span class="admin-name">管理员</span>
+                    <button class="logout-btn" onclick="logout()">退出</button>
+                </div>
+            </header>
+
+            <!-- 页面内容 -->
+            <div class="page-container">
+                <!-- 数据概览页面 -->
+                <div class="page active" id="page-dashboard">
+                    <div class="page-header">
+                        <h2>📊 数据概览</h2>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="total-users">0</div>
+                                <div class="stat-label">总用户数</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="total-coins">0</div>
+                                <div class="stat-label">流通金币</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🌱</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="total-plants">0</div>
+                                <div class="stat-label">累计种植</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🎉</div>
+                            <div class="stat-info">
+                                <div class="stat-value" id="total-harvests">0</div>
+                                <div class="stat-label">累计收获</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="data-section">
+                        <h3>📈 用户等级分布</h3>
+                        <div class="level-distribution" id="level-dist"></div>
+                    </div>
+
+                    <div class="data-section">
+                        <h3>🏆 成就统计</h3>
+                        <div class="achievement-stats" id="achievement-stats"></div>
+                    </div>
+
+                    <div class="data-section">
+                        <h3>📅 最近活动</h3>
+                        <div class="recent-activity" id="recent-activity"></div>
+                    </div>
+                </div>
+
+                <!-- 用户管理页面 -->
+                <div class="page" id="page-users">
+                    <div class="page-header">
+                        <h2>👥 用户管理</h2>
+                        <div class="search-box">
+                            <input type="text" id="user-search" placeholder="搜索用户 ID 或用户名...">
+                            <button class="search-btn" onclick="searchUser()">🔍</button>
+                        </div>
+                    </div>
+                    
+                    <div class="content-card">
+                        <div class="user-list" id="user-list"></div>
+                    </div>
+                </div>
+
+                <!-- 游戏设置页面 -->
+                <div class="page" id="page-game-settings">
+                    <div class="page-header">
+                        <h2>⚙️ 游戏设置</h2>
+                    </div>
+                    
+                    <div class="content-card">
+                        <h3>🎮 游戏参数</h3>
+                        <div class="setting-item">
+                            <label>生长速度倍数</label>
+                            <div class="slider-group">
+                                <input type="range" id="growth-speed" min="0.5" max="5" step="0.5" value="1">
+                                <span class="slider-value" id="growth-speed-value">1x</span>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>枯萎时间（小时）</label>
+                            <input type="number" id="wither-time" min="1" max="72" value="2">
+                        </div>
+                        <div class="setting-item">
+                            <label>金币收益倍率</label>
+                            <div class="slider-group">
+                                <input type="range" id="coin-rate" min="0.5" max="5" step="0.5" value="1">
+                                <span class="slider-value" id="coin-rate-value">1x</span>
+                            </div>
+                        </div>
+                        <div class="setting-item">
+                            <label>经验收益倍率</label>
+                            <div class="slider-group">
+                                <input type="range" id="exp-rate" min="0.5" max="5" step="0.5" value="1">
+                                <span class="slider-value" id="exp-rate-value">1x</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary" onclick="saveGameSettings()">保存设置</button>
+                    </div>
+
+                    <div class="content-card">
+                        <h3>🎊 活动设置</h3>
+                        <div class="setting-item">
+                            <label>双倍金币活动</label>
+                            <label class="switch">
+                                <input type="checkbox" id="double-coin-event">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>双倍经验活动</label>
+                            <label class="switch">
+                                <input type="checkbox" id="double-exp-event">
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="setting-item">
+                            <label>活动结束时间</label>
+                            <input type="datetime-local" id="event-end-time">
+                        </div>
+                        <button class="btn btn-primary" onclick="saveEventSettings()">保存活动</button>
+                    </div>
+                </div>
+
+                <!-- 道具管理页面 -->
+                <div class="page" id="page-items">
+                    <h2>🎒 道具管理</h2>
+                    
+                    <div class="items-section">
+                        <h3>🌱 种子管理</h3>
+                        <div class="items-grid" id="seed-list"></div>
+                    </div>
+
+                    <div class="items-section">
+                        <h3>📤 发放道具</h3>
+                        <div class="give-item-form">
+                            <select id="give-item-type">
+                                <option value="user">指定用户</option>
+                                <option value="all">全服用户</option>
+                            </select>
+                            <input type="text" id="give-item-user" placeholder="用户 ID（选填）">
+                            <select id="give-item-id"></select>
+                            <input type="number" id="give-item-qty" placeholder="数量" value="1" min="1" max="999">
+                            <button class="btn-give" onclick="giveItem()">发放</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 礼包码页面 -->
+                <div class="page" id="page-gift-codes">
+                    <h2>🎁 礼包码管理</h2>
+                    
+                    <div class="gift-section">
+                        <h3>创建礼包码</h3>
+                        <div class="gift-form">
+                            <input type="text" id="gift-code" placeholder="礼包码（留空自动生成）" maxlength="20">
+                            <select id="gift-reward-type">
+                                <option value="coins">金币</option>
+                                <option value="seeds">种子</option>
+                                <option value="items">道具</option>
+                            </select>
+                            <input type="text" id="gift-reward-id" placeholder="奖励 ID（如 radish）">
+                            <input type="number" id="gift-reward-qty" placeholder="数量" value="100" min="1">
+                            <input type="number" id="gift-limit" placeholder="兑换次数限制" value="100">
+                            <button class="btn-create" onclick="createGiftCode()">生成礼包码</button>
+                        </div>
+                    </div>
+
+                    <div class="gift-section">
+                        <h3>礼包码列表</h3>
+                        <div class="gift-list" id="gift-list"></div>
+                    </div>
+                </div>
+
+                <!-- 邮件系统页面 -->
+                <div class="page" id="page-mail">
+                    <h2>📬 邮件系统</h2>
+                    
+                    <div class="mail-section">
+                        <h3>发送邮件</h3>
+                        <div class="mail-form">
+                            <select id="mail-target-type">
+                                <option value="all">全服用户</option>
+                                <option value="user">指定用户</option>
+                            </select>
+                            <input type="text" id="mail-target-user" placeholder="用户 ID（指定用户时填写）">
+                            <input type="text" id="mail-title" placeholder="邮件标题" maxlength="50">
+                            <textarea id="mail-content" placeholder="邮件内容" maxlength="500" rows="4"></textarea>
+                            <select id="mail-reward-type">
+                                <option value="none">无附件</option>
+                                <option value="coins">金币</option>
+                                <option value="seeds">种子</option>
+                            </select>
+                            <input type="text" id="mail-reward-id" placeholder="奖励 ID">
+                            <input type="number" id="mail-reward-qty" placeholder="数量" value="100">
+                            <button class="btn-send" onclick="sendMail()">发送邮件</button>
+                        </div>
+                    </div>
+
+                    <div class="mail-section">
+                        <h3>邮件记录</h3>
+                        <div class="mail-history" id="mail-history"></div>
+                    </div>
+                </div>
+
+                <!-- 成就管理页面 -->
+                <div class="page" id="page-achievements">
+                    <h2>🏆 成就管理</h2>
+                    
+                    <div class="achievements-section">
+                        <h3>成就列表</h3>
+                        <div class="achievements-grid" id="achievements-list"></div>
+                    </div>
+
+                    <div class="achievements-section">
+                        <h3>创建新成就</h3>
+                        <div class="achievement-form">
+                            <input type="text" id="ach-id" placeholder="成就 ID（英文）" maxlength="20">
+                            <input type="text" id="ach-name" placeholder="成就名称" maxlength="20">
+                            <input type="text" id="ach-desc" placeholder="成就描述" maxlength="50">
+                            <input type="text" id="ach-emoji" placeholder="图标 Emoji" maxlength="2">
+                            <input type="text" id="ach-condition" placeholder="达成条件（如：harvestCount>=100）">
+                            <button class="btn-create" onclick="createAchievement()">创建成就</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作日志页面 -->
+                <div class="page" id="page-logs">
+                    <h2>📝 操作日志</h2>
+                    
+                    <div class="logs-section">
+                        <div class="logs-filter">
+                            <select id="log-type-filter">
+                                <option value="all">全部类型</option>
+                                <option value="user">用户操作</option>
+                                <option value="item">道具操作</option>
+                                <option value="system">系统操作</option>
+                            </select>
+                            <input type="text" id="log-search" placeholder="搜索日志...">
+                            <button class="btn-refresh" onclick="renderLogs()">🔄</button>
+                            <button class="btn-clear" onclick="clearLogs()">清除日志</button>
+                        </div>
+                        <div class="logs-list" id="logs-list"></div>
+                    </div>
+                </div>
+
+                <!-- 数据管理页面 -->
+                <div class="page" id="page-data">
+                    <h2>💾 数据管理</h2>
+                    
+                    <div class="data-section">
+                        <h3>数据导出</h3>
+                        <div class="data-actions">
+                            <button class="btn-data" onclick="exportUserData()">导出用户数据</button>
+                            <button class="btn-data" onclick="exportGameData()">导出游戏配置</button>
+                            <button class="btn-data" onclick="exportLogs()">导出日志</button>
+                        </div>
+                    </div>
+
+                    <div class="data-section">
+                        <h3>数据导入</h3>
+                        <div class="data-actions">
+                            <input type="file" id="import-file" accept=".json">
+                            <select id="import-type">
+                                <option value="users">用户数据</option>
+                                <option value="game">游戏配置</option>
+                            </select>
+                            <button class="btn-data" onclick="importData()">导入数据</button>
+                        </div>
+                    </div>
+
+                    <div class="data-section">
+                        <h3>⚠️ 危险操作</h3>
+                        <div class="danger-actions">
+                            <button class="btn-danger" onclick="cleanupInactiveUsers()">清理 30 天未登录用户</button>
+                            <button class="btn-danger" onclick="resetAllUsers()">重置所有用户进度</button>
+                            <button class="btn-danger dangerous" onclick="wipeAllData()">⚠️ 清空所有数据</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 用户详情弹窗 -->
+    <div class="modal" id="user-detail-modal">
+        <div class="modal-content large">
+            <h2>👤 用户详情</h2>
+            <div class="modal-body" id="user-detail-body"></div>
+            <button class="close-btn" onclick="closeModal('user-detail-modal')">关闭</button>
+        </div>
+    </div>
+
+    <!-- 确认弹窗 -->
+    <div class="modal" id="confirm-modal">
+        <div class="modal-content">
+            <h2>⚠️ 确认操作</h2>
+            <div class="modal-body" id="confirm-body"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal('confirm-modal')">取消</button>
+                <button class="btn-confirm" id="confirm-action-btn">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin.js"></script>
+    <script>
+        window.onload = function() {
+            const loggedIn = localStorage.getItem('farmAdminLoggedIn');
+            if (loggedIn === 'true') {
+                showAdminContent();
+            }
+        };
+
+        function adminLogin() {
+            const username = document.getElementById('admin-username').value;
+            const password = document.getElementById('admin-password').value;
+            if (username === '123456' && password === '123456') {
+                localStorage.setItem('farmAdminLoggedIn', 'true');
+                document.getElementById('login-error').style.display = 'none';
+                showAdminContent();
+            } else {
+                const errorEl = document.getElementById('login-error');
+                errorEl.textContent = '账号或密码错误';
+                errorEl.style.display = 'block';
+            }
+        }
+
+        function showAdminContent() {
+            document.getElementById('login-overlay').classList.add('hidden');
+            document.getElementById('admin-content').classList.remove('hidden');
+            if (window.initAdmin) window.initAdmin();
+        }
+    </script>
+</body>
+</html>

@@ -655,7 +655,6 @@ $announcements = $stmt->fetchAll();
             }
         });
 
-    <script>
         function copyToClipboard(text) {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(function() {

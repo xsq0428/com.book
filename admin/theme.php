@@ -109,24 +109,30 @@ ob_start();
                 <div class="row g-4">
                     <?php foreach ($themes as $key => $theme): ?>
                     <div class="col-6 col-md-4 col-lg-3">
-                        <form method="POST" action="theme.php">
-                            <input type="hidden" name="theme_color" value="<?= $key ?>">
-                            <div class="card theme-card h-100" style="cursor: pointer;" onclick="this.querySelector('form').submit()">
-                                <div class="card-body text-center position-relative">
-                                    <?php if ($theme['active']): ?>
-                                    <span class="badge bg-success position-absolute top-0 end-0 m-2">
-                                        <i class="bi bi-check-circle-fill"></i> 当前
+                        <div class="card theme-card h-100" style="cursor: pointer;" onclick="submitTheme('<?= $key ?>')">
+                            <div class="card-body text-center position-relative">
+                                <?php if ($theme['active']): ?>
+                                <span class="badge bg-success position-absolute top-0 end-0 m-2">
+                                    <i class="bi bi-check-circle-fill"></i> 当前
+                                </span>
+                                <?php endif; ?>
+                                
+                                <div class="theme-preview mb-3" style="background: <?= $theme['gradient'] ?>; height: 80px; border-radius: 8px;"></div>
+                                
+                                <h6 class="mb-1"><?= $theme['name'] ?></h6>
+                                <small class="text-muted" style="font-size: 11px;">
+                                    <?= $theme['primary'] ?> → <?= $theme['secondary'] ?>
+                                </small>
+                                
+                                <div class="mt-2">
+                                    <span class="btn btn-sm" style="background: <?= $theme['gradient'] ?>; color: white;">
+                                        <i class="bi bi-palette"></i> 切换
                                     </span>
-                                    <?php endif; ?>
-                                    
-                                    <div class="theme-preview mb-3" style="background: <?= $theme['gradient'] ?>; height: 80px; border-radius: 8px;"></div>
-                                    
-                                    <h6 class="mb-1"><?= $theme['name'] ?></h6>
-                                    <small class="text-muted" style="font-size: 11px;">
-                                        <?= $theme['primary'] ?> → <?= $theme['secondary'] ?>
-                                    </small>
                                 </div>
                             </div>
+                        </div>
+                        <form id="theme-form-<?= $key ?>" method="POST" action="theme.php" style="display:none;">
+                            <input type="hidden" name="theme_color" value="<?= $key ?>">
                         </form>
                     </div>
                     <?php endforeach; ?>
@@ -217,7 +223,7 @@ ob_start();
 .theme-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    border-color: <?= $themes[$currentTheme]['primary'] ?>;
+    border-color: var(--theme-primary);
 }
 
 .theme-preview {
@@ -237,7 +243,63 @@ ob_start();
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
+/* 加载动画 */
+.theme-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255,255,255,0.9);
+    z-index: 9999;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.theme-loading.show {
+    display: flex;
+}
+
+.theme-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e9ecef;
+    border-top-color: var(--theme-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.theme-loading-text {
+    margin-top: 15px;
+    color: #666;
+    font-size: 14px;
+}
 </style>
+
+<!-- 加载中提示 -->
+<div id="themeLoading" class="theme-loading">
+    <div class="theme-spinner"></div>
+    <div class="theme-loading-text">正在切换主题...</div>
+</div>
+
+<script>
+function submitTheme(theme) {
+    // 显示加载动画
+    document.getElementById('themeLoading').classList.add('show');
+    
+    // 提交隐藏表单
+    setTimeout(function() {
+        document.getElementById('theme-form-' + theme).submit();
+    }, 300);
+}
+</script>
 <?php
 $content = ob_get_clean();
 require 'layout.php';

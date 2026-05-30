@@ -9,6 +9,33 @@
     <style>
         :root {
             --sidebar-width: 280px;
+            <?php
+            // 获取主题颜色配置
+            require_once '../config/database.php';
+            try {
+                $pdo = getDbConnection();
+                $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'theme_color'");
+                $stmt->execute();
+                $themeColor = $stmt->fetchColumn() ?: 'purple';
+                
+                $themeColors = [
+                    'purple' => ['#667eea', '#764ba2'],
+                    'blue' => ['#1e3c72', '#2a5298'],
+                    'green' => ['#11998e', '#38ef7d'],
+                    'orange' => ['#f5576c', '#f093fb'],
+                    'pink' => ['#ff758c', '#ff7eb3'],
+                    'dark' => ['#232526', '#414345'],
+                    'cyan' => ['#06beb6', '#48b1bf'],
+                    'sunset' => ['#ff512f', '#dd2476']
+                ];
+                
+                $colors = $themeColors[$themeColor] ?? $themeColors['purple'];
+                echo "--theme-primary: {$colors[0]};\n";
+                echo "--theme-secondary: {$colors[1]};";
+            } catch (PDOException $e) {
+                echo "--theme-primary: #667eea;\n--theme-secondary: #764ba2;";
+            }
+            ?>
         }
         
         * {
@@ -23,8 +50,8 @@
         
         /* 顶部导航栏 */
         .top-navbar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 12px 15px;
+            background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
+            padding: 12px 20px;
             position: fixed;
             top: 0;
             left: 0;
@@ -34,7 +61,34 @@
             align-items: center;
             justify-content: space-between;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            height: 60px;
+        }
+        
+        /* 侧边栏 */
+        .sidebar {
+            background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
+            min-height: 100vh;
+            padding-top: 70px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            transition: transform 0.3s ease, background 0.3s ease;
+            z-index: 1020;
+            overflow-y: auto;
+        }
+        
+        /* 按钮 */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-secondary) 100%);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--theme-secondary) 0%, var(--theme-primary) 100%);
+        }
+        
+        .badge.bg-primary {
+            background-color: var(--theme-primary) !important;
         }
         
         .navbar-brand {
@@ -485,6 +539,10 @@
                 <span>公告管理</span>
             </a>
             <div class="sidebar-divider"></div>
+            <a href="theme.php" class="<?= basename($_SERVER['PHP_SELF']) == 'theme.php' ? 'active' : '' ?>">
+                <i class="bi bi-palette"></i>
+                <span>主题配色</span>
+            </a>
             <a href="settings.php" class="<?= basename($_SERVER['PHP_SELF']) == 'settings.php' ? 'active' : '' ?>">
                 <i class="bi bi-gear"></i>
                 <span>系统设置</span>

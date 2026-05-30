@@ -26,6 +26,29 @@ $announcements = $stmt->fetchAll();
     <title><?= htmlspecialchars($settings['site_title'] ?? '二次元地址发布页') ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            <?php
+            $themeColor = $settings['theme_color'] ?? 'pink';
+            $themeColors = [
+                'purple' => ['#667eea', '#764ba2', '#ffeef8', '#f0e6ff', '#e6f3ff', '#d63384'],
+                'blue' => ['#1e3c72', '#2a5298', '#e8f1ff', '#d4e4ff', '#c2d8ff', '#1e3c72'],
+                'green' => ['#11998e', '#38ef7d', '#e8fff8', '#d4ffef', '#c2ffe6', '#11998e'],
+                'orange' => ['#f093fb', '#f5576c', '#fff0f8', '#ffe0f0', '#ffd0e8', '#f5576c'],
+                'pink' => ['#ff758c', '#ff7eb3', '#ffeef8', '#f8e0f0', '#f0d0e8', '#e91e63'],
+                'dark' => ['#232526', '#414345', '#f5f5f5', '#e8e8e8', '#d8d8d8', '#666'],
+                'cyan' => ['#06beb6', '#48b1bf', '#e8fffa', '#d4fff5', '#c2fff0', '#06beb6'],
+                'sunset' => ['#ff512f', '#dd2476', '#fff0f5', '#ffe0eb', '#ffd0e0', '#dd2476']
+            ];
+            
+            $colors = $themeColors[$themeColor] ?? $themeColors['pink'];
+            echo "--primary: {$colors[0]};\n";
+            echo "--secondary: {$colors[1]};\n";
+            echo "--bg-start: {$colors[2]};\n";
+            echo "--bg-mid: {$colors[3]};\n";
+            echo "--bg-end: {$colors[4]};\n";
+            echo "--title: {$colors[5]};\n";
+            ?>
+        }
         * {
             margin: 0;
             padding: 0;
@@ -34,7 +57,7 @@ $announcements = $stmt->fetchAll();
 
         body {
             font-family: 'Noto Sans SC', sans-serif;
-            background: linear-gradient(135deg, #ffeef8 0%, #f0e6ff 50%, #e6f3ff 100%);
+            background: linear-gradient(135deg, var(--bg-start, #ffeef8) 0%, var(--bg-mid, #f0e6ff) 50%, var(--bg-end, #e6f3ff) 100%);
             min-height: 100vh;
             overflow-x: hidden;
             position: relative;
@@ -111,16 +134,10 @@ $announcements = $stmt->fetchAll();
             z-index: 2;
         }
 
-        .logo-container {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 16px;
-        }
-
         .logo {
             width: 90px;
             height: 90px;
-            background: linear-gradient(45deg, #ffb6c1, #ffc0cb, #dda0dd, #e6e6fa);
+            background: linear-gradient(45deg, var(--primary), var(--secondary), #dda0dd, #e6e6fa);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -132,6 +149,12 @@ $announcements = $stmt->fetchAll();
             animation: pulse 3s ease-in-out infinite;
             border: 3px solid rgba(255, 255, 255, 0.3);
             overflow: hidden;
+        }
+
+        .logo-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 16px;
         }
 
         .logo-inner {
@@ -147,7 +170,7 @@ $announcements = $stmt->fetchAll();
             left: -15px;
             right: -15px;
             bottom: -15px;
-            background: linear-gradient(45deg, #ffb6c1, #ffc0cb, #dda0dd);
+            background: linear-gradient(45deg, var(--primary), var(--secondary), var(--bg-end));
             border-radius: 50%;
             opacity: 0.2;
             animation: glow 3s ease-in-out infinite;
@@ -166,14 +189,14 @@ $announcements = $stmt->fetchAll();
         .main-title {
             font-size: 22px;
             font-weight: 700;
-            color: #d63384;
+            color: var(--title);
             margin-bottom: 8px;
             text-shadow: 0 2px 8px rgba(214, 51, 132, 0.3);
         }
 
         .subtitle {
             font-size: 14px;
-            color: #e91e63;
+            color: var(--secondary);
             font-weight: 400;
             opacity: 0.8;
         }
@@ -576,6 +599,61 @@ $announcements = $stmt->fetchAll();
             </div>
         </footer>
     </div>
+
+    <!-- 主题切换按钮 -->
+    <button onclick="toggleThemePanel()" style="position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:var(--primary);color:white;border:none;box-shadow:0 4px 12px rgba(0,0,0,0.2);cursor:pointer;z-index:9999;font-size:20px;">
+        🎨
+    </button>
+
+    <!-- 主题面板 -->
+    <div id="themePanel" style="display:none;position:fixed;bottom:80px;right:20px;background:white;border-radius:15px;padding:15px;box-shadow:0 8px 32px rgba(0,0,0,0.15);z-index:9999;min-width:200px;">
+        <div style="font-weight:700;margin-bottom:10px;color:var(--primary);">🎨 选择主题</div>
+        <div style="display:grid;grid-template-columns:repeat(2, 1fr);gap:8px;">
+            <?php
+            $frontendThemes = [
+                'pink' => ['甜美粉色', '#ff758c'],
+                'purple' => ['浪漫紫色', '#667eea'],
+                'blue' => ['深邃蓝色', '#1e3c72'],
+                'green' => ['清新绿色', '#11998e'],
+                'orange' => ['活力橙色', '#f093fb'],
+                'dark' => ['经典黑色', '#232526'],
+                'cyan' => ['青色海洋', '#06beb6'],
+                'sunset' => ['夕阳红霞', '#ff512f']
+            ];
+            foreach ($frontendThemes as $key => $theme): ?>
+            <button onclick="switchTheme('<?= $key ?>')" style="padding:8px;border:2px solid #eee;border-radius:8px;background:white;cursor:pointer;font-size:12px;text-align:center;" title="<?= $theme[0] ?>">
+                <div style="width:20px;height:20px;border-radius:4px;background:<?= $theme[1] ?>;margin:0 auto 4px;"></div>
+                <?= $theme[0] ?>
+            </button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <script>
+        function toggleThemePanel() {
+            var panel = document.getElementById('themePanel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function switchTheme(theme) {
+            fetch('api/theme.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({theme_color: theme})
+            }).then(function() {
+                location.reload();
+            });
+        }
+
+        // 点击外部关闭面板
+        document.addEventListener('click', function(e) {
+            var panel = document.getElementById('themePanel');
+            var btn = e.target.closest('button');
+            if (btn && btn.onclick.toString().includes('toggleThemePanel')) return;
+            if (panel && !panel.contains(e.target)) {
+                panel.style.display = 'none';
+            }
+        });
 
     <script>
         function copyToClipboard(text) {
